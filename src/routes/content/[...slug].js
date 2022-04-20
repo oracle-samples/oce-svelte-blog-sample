@@ -5,16 +5,13 @@
 
 import http from 'http';
 import https from 'https';
-import { getAuthValue, isAuthNeeded } from '../../scripts/server-config-utils.js';
+import getClient from '../../scripts/server-config-utils.js';
 
 export async function get(req, res) {
-  if (isAuthNeeded()) {
-    getAuthValue().then((authValue) => {
-      handleContentRequest(req, res, authValue);
-    });
-  } else {
-    handleContentRequest(req, res, '');
-  }
+  const client = getClient();
+  client.getAuthorizationHeaderValue().then((authValue) => {
+    handleContentRequest(req, res, authValue);
+  });
 }
 
 /*
@@ -25,7 +22,6 @@ function handleContentRequest(req, res, authValue) {
   if (req.method !== 'GET') {
     return;
   }
-
   let oceUrl = `${process.env.SERVER_URL}${req.url}`;
   oceUrl = oceUrl.replace(/&amp;/g, "&");
   // Add the authorization header
